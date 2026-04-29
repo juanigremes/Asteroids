@@ -1,4 +1,5 @@
 import pygame
+import math
 import circleshape
 from shot import Shot
 from constants import PLAYER_IMAGE, PLAYER_RADIUS, LINE_WIDTH, PLAYER_TURN_SPEED, PLAYER_SPEED, PLAYER_SHOT_SPEED, PLAYER_SHOOT_COOLDOWN_SECONDS
@@ -10,6 +11,8 @@ class Player(circleshape.CircleShape):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
         self.shot_cooldown_timer = 0
+
+        self.shoot_right = True
 
         image = pygame.image.load(PLAYER_IMAGE)
         image = pygame.transform.rotate(image, 90)
@@ -26,7 +29,7 @@ class Player(circleshape.CircleShape):
     def draw(self, screen):
         self.image = pygame.transform.rotate(self.og_image, -self.rotation)
         screen.blit(self.image, self.image.get_rect(center=self.position))
-        pygame.draw.polygon(screen, "white", self.triangle(), LINE_WIDTH)
+        #pygame.draw.polygon(screen, "white", self.triangle(), LINE_WIDTH)
 
     def rotate(self, delta_time):
         self.rotation += PLAYER_TURN_SPEED * delta_time
@@ -41,7 +44,9 @@ class Player(circleshape.CircleShape):
         if self.shot_cooldown_timer > 0:
             return
         self.shot_cooldown_timer = PLAYER_SHOOT_COOLDOWN_SECONDS
-        shot = Shot(self.position.x, self.position.y)
+        xdis, ydis = calcular_disparo(self.position, self.rotation, self.shoot_right)
+        self.shoot_right = not self.shoot_right
+        shot = Shot(xdis, ydis)
         shot_direction = pygame.Vector2(0,1)
         shot.velocity = shot_direction.rotate(self.rotation) * PLAYER_SHOT_SPEED
 
@@ -57,8 +62,17 @@ class Player(circleshape.CircleShape):
             self.rotate(-1 * delta_time)
         if keys[pygame.K_RIGHT]:
             self.rotate(delta_time)
+        
         if keys[pygame.K_UP]:
             self.move(delta_time)
         if keys[pygame.K_DOWN]:
             self.move(-1 * delta_time)
 
+def calcular_disparo(center, rotation, shoot_right):
+    if shoot_right:
+        angulo = math.radians(rotation)
+    else:
+        angulo = math.radians(rotation+180)
+    x2 = center.x + 30 * math.cos(angulo)
+    y2 = center.y + 30 * math.sin(angulo)
+    return x2, y2

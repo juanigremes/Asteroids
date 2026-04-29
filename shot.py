@@ -8,7 +8,7 @@ class Shot(circleshape.CircleShape):
         super().__init__(x, y, SHOT_RADIUS)
 
     def draw(self, screen):
-        pygame.draw.circle(screen, "green", self.position, SHOT_RADIUS, LINE_WIDTH)
+        pygame.draw.circle(screen, "red", self.position, SHOT_RADIUS, LINE_WIDTH)
     
     def update(self, delta_time):
         self.position += self.velocity * delta_time
