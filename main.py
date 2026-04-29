@@ -2,7 +2,7 @@
 import sys
 import pygame 
 from logger import log_event
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT
+#from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from logger import log_state
 from player import Player
 from asteroid import Asteroid
@@ -15,10 +15,64 @@ from shot import Shot
 
 def main():
     print(f"Starting Asteroids with pygame version: {pygame.version.ver}")
-    print(f"Screen width: {SCREEN_WIDTH} \nScreen height: {SCREEN_HEIGHT}")
 
     pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+    
+    start_menu(screen)
+
+
+
+def start_menu(screen):
+    #Menu de inicio
+    start = False
+    font = pygame.font.Font("Starjedi.ttf", 50)
+    background = pygame.image.load("fondo_menu.jpg").convert()
+    background = pygame.transform.scale(background, screen.get_size())
+
+
+    options = ["Jugar","Cambiar Fondo", "Salir"]
+    selected = 0
+
+    while not start:
+
+        for evento in pygame.event.get():
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_DOWN:
+                    selected = (selected + 1) % len(options)
+                if evento.key == pygame.K_UP:
+                    selected = (selected - 1) % len(options)
+                if evento.key == pygame.K_RETURN:
+                    if selected == 0:
+                        start = True
+                    elif selected == 1:
+                        pygame.quit()
+                        sys.exit()
+                        #opciones para cambiar mapa, todavia no pasa nada
+                    else:
+                        pygame.quit()
+                        sys.exit()
+
+        screen.blit(background, (0,0))
+
+        for i, option in enumerate(options):
+            color = (255, 255, 255)
+            if i == selected:
+                color = (255, 222, 6)  # resaltado
+
+            text = font.render(option, True, color)
+            screen.blit(text, (300, 200 + i * 80))
+
+        pygame.display.flip()
+
+    game_loop(screen)
+
+
+
+def game_loop(screen):
+    background = pygame.image.load("fondo_juego.jpg").convert()
+    background = pygame.transform.scale(background, screen.get_size())
+
     clock = pygame.time.Clock()
     delta_time = 0
     
@@ -35,21 +89,20 @@ def main():
     Shot.containers = (shots, updatable, drawable)
 
     asteroid_field = AsteroidField()
-    player = Player(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
+    player = Player(screen.get_width()/2, screen.get_height()/2)#SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
 
     while True:
         log_state()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
-        screen.fill("black")
+        screen.blit(background, (0,0))
 
         updatable.update(delta_time)
         for asteroid in asteroids:
             if asteroid.collides_with(player):
                 log_event("player_hit")
-                print("Game over!")
-                sys.exit()
+                start_menu(screen)
             for shot in shots:
                 if asteroid.collides_with(shot):
                     log_event("asteroid_shot")

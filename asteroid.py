@@ -14,7 +14,7 @@ class Asteroid(circleshape.CircleShape):
         self.rot_speed = random.choice(rotaciones)
 
         image = pygame.image.load(ASTEROID_IMAGE)
-        scale = int(50 * (radius/ASTEROID_MIN_RADIUS))
+        scale = int(40 * (radius/ASTEROID_MIN_RADIUS))
         scaled_image = pygame.transform.smoothscale(image, (scale,scale))
         final_image = pygame.transform.rotate(scaled_image, random.randint(0,180))
 
@@ -24,7 +24,7 @@ class Asteroid(circleshape.CircleShape):
     def draw(self, screen):
         image = pygame.transform.rotate(self.og_image, self.rotation)
         screen.blit(image, image.get_rect(center=self.position))
-        pygame.draw.circle(screen, "white", self.position, self.radius, LINE_WIDTH)
+        #pygame.draw.circle(screen, "white", self.position, self.radius, LINE_WIDTH)
     
 
     def update(self, delta_time):
