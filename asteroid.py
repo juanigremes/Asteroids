@@ -1,7 +1,7 @@
 import pygame
 import circleshape
 from logger import log_event
-from constants import LINE_WIDTH, ASTEROID_MIN_RADIUS, ASTEROID_IMAGE
+from constants import LINE_WIDTH, ASTEROID_MIN_RADIUS, ASTEROID_MAX_RADIUS, ASTEROID_IMAGE, ASTEROID_KINDS
 import random
 
 class Asteroid(circleshape.CircleShape):
@@ -24,7 +24,7 @@ class Asteroid(circleshape.CircleShape):
     def draw(self, screen):
         image = pygame.transform.rotate(self.og_image, self.rotation)
         screen.blit(image, image.get_rect(center=self.position))
-        #pygame.draw.circle(screen, "white", self.position, self.radius, LINE_WIDTH)
+        pygame.draw.circle(screen, "white", self.position, self.radius, LINE_WIDTH)
     
 
     def update(self, delta_time):
@@ -47,3 +47,9 @@ class Asteroid(circleshape.CircleShape):
 
         first_ast.velocity = first_ast_vel
         second_ast.velocity = second_ast_vel
+
+    def get_points_value(self):
+        res = int(ASTEROID_MAX_RADIUS/self.radius)
+        if self.radius == ASTEROID_MAX_RADIUS:
+            res *= -1
+        return res
