@@ -1,0 +1,1 @@
+highscore = ["karen la mejor",39]

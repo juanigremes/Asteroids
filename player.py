@@ -18,18 +18,14 @@ class Player(circleshape.CircleShape):
         image = pygame.transform.rotate(image, 90)
         self.og_image = pygame.transform.smoothscale(image, (70,70))
 
-    def triangle(self):
-        forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
-        a = self.position + forward * self.radius
-        b = self.position - forward * self.radius - right
-        c = self.position - forward * self.radius + right
-        return [a, b, c]
+        shot_sound = pygame.mixer.Sound("shot_sound.mp3")
+        shot_sound.set_volume(0.5)
+        self.shot_sound = shot_sound
+
 
     def draw(self, screen):
         self.image = pygame.transform.rotate(self.og_image, -self.rotation)
         screen.blit(self.image, self.image.get_rect(center=self.position))
-        #pygame.draw.polygon(screen, "white", self.triangle(), LINE_WIDTH)
 
     def rotate(self, delta_time):
         self.rotation += PLAYER_TURN_SPEED * delta_time
@@ -49,6 +45,7 @@ class Player(circleshape.CircleShape):
         shot = Shot(xdis, ydis)
         shot_direction = pygame.Vector2(0,1)
         shot.velocity = shot_direction.rotate(self.rotation) * PLAYER_SHOT_SPEED
+        self.shot_sound.play()
 
     def update(self, delta_time):
         self.shot_cooldown_timer -= delta_time

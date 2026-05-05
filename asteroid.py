@@ -6,12 +6,14 @@ import random
 
 class Asteroid(circleshape.CircleShape):
 
-    def __init__(self, x, y, radius):
+    def __init__(self, x, y, radius, initial_speed):
         super().__init__(x, y, radius)
         self.rotation = 0
 
         rotaciones = [-2, -1, -0.5, 0.5, 1, 2]
         self.rot_speed = random.choice(rotaciones)
+
+        self.speed_modifier = initial_speed
 
         image = pygame.image.load(ASTEROID_IMAGE)
         scale = int(40 * (radius/ASTEROID_MIN_RADIUS))
@@ -24,11 +26,11 @@ class Asteroid(circleshape.CircleShape):
     def draw(self, screen):
         image = pygame.transform.rotate(self.og_image, self.rotation)
         screen.blit(image, image.get_rect(center=self.position))
-        pygame.draw.circle(screen, "white", self.position, self.radius, LINE_WIDTH)
+        #pygame.draw.circle(screen, "white", self.position, self.radius, LINE_WIDTH)
     
 
     def update(self, delta_time):
-        self.position += self.velocity * delta_time * 1.5
+        self.position += self.velocity * delta_time * self.speed_modifier
         self.rotation += delta_time * self.rot_speed * 15
 
     def split(self):
@@ -42,8 +44,8 @@ class Asteroid(circleshape.CircleShape):
         second_ast_vel = self.velocity.rotate(-angle)*1.2
         new_radius = self.radius - ASTEROID_MIN_RADIUS
 
-        first_ast = Asteroid(self.position.x, self.position.y, new_radius)
-        second_ast = Asteroid(self.position.x, self.position.y, new_radius)
+        first_ast = Asteroid(self.position.x, self.position.y, new_radius, self.speed_modifier)
+        second_ast = Asteroid(self.position.x, self.position.y, new_radius, self.speed_modifier)
 
         first_ast.velocity = first_ast_vel
         second_ast.velocity = second_ast_vel
@@ -53,3 +55,4 @@ class Asteroid(circleshape.CircleShape):
         if self.radius == ASTEROID_MAX_RADIUS:
             res *= -1
         return res
+
