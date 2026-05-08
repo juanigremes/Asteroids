@@ -2,7 +2,7 @@ import pygame
 import math
 import circleshape
 from shot import Shot
-from constants import PLAYER_IMAGE, PLAYER_RADIUS, LINE_WIDTH, PLAYER_TURN_SPEED, PLAYER_SPEED, PLAYER_SHOT_SPEED, PLAYER_SHOOT_COOLDOWN_SECONDS
+from constants import PLAYER_IMAGE, PLAYER_RADIUS, LINE_WIDTH, PLAYER_TURN_SPEED, PLAYER_SPEED, PLAYER_SHOT_SPEED, PLAYER_SHOOT_COOLDOWN_SECONDS, ASTEROID_MAX_RADIUS
 
 
 class Player(circleshape.CircleShape):
@@ -18,8 +18,8 @@ class Player(circleshape.CircleShape):
         image = pygame.transform.rotate(image, 90)
         self.og_image = pygame.transform.smoothscale(image, (70,70))
 
-        shot_sound = pygame.mixer.Sound("shot_sound.mp3")
-        shot_sound.set_volume(0.5)
+        shot_sound = pygame.mixer.Sound("sonido/XWing_shot.wav")
+        shot_sound.set_volume(0.4)
         self.shot_sound = shot_sound
 
 
@@ -47,7 +47,7 @@ class Player(circleshape.CircleShape):
         shot.velocity = shot_direction.rotate(self.rotation) * PLAYER_SHOT_SPEED
         self.shot_sound.play()
 
-    def update(self, delta_time):
+    def update(self, delta_time, asteroid_field):
         self.shot_cooldown_timer -= delta_time
 
         keys = pygame.key.get_pressed()
@@ -62,8 +62,19 @@ class Player(circleshape.CircleShape):
         
         if keys[pygame.K_UP]:
             self.move(delta_time)
+            diff1 = self.position + pygame.Vector2(ASTEROID_MAX_RADIUS,ASTEROID_MAX_RADIUS)
+            diff2 = self.position - pygame.Vector2(ASTEROID_MAX_RADIUS,ASTEROID_MAX_RADIUS)
+            if not asteroid_field.contiene(diff1) or not asteroid_field.contiene(diff2):
+                self.move(-1 * delta_time)
+
         if keys[pygame.K_DOWN]:
             self.move(-1 * delta_time)
+            diff1 = self.position + pygame.Vector2(ASTEROID_MAX_RADIUS,ASTEROID_MAX_RADIUS)
+            diff2 = self.position - pygame.Vector2(ASTEROID_MAX_RADIUS,ASTEROID_MAX_RADIUS)
+            if not asteroid_field.contiene(diff1) or not asteroid_field.contiene(diff2):
+                self.move(+1 * delta_time)
+
+
 
 def calcular_disparo(center, rotation, shoot_right):
     if shoot_right:

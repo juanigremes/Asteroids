@@ -6,20 +6,19 @@ import random
 
 class Asteroid(circleshape.CircleShape):
 
-    def __init__(self, x, y, radius, initial_speed):
+    def __init__(self, x, y, radius, speed_modif):
         super().__init__(x, y, radius)
         self.rotation = 0
 
         rotaciones = [-2, -1, -0.5, 0.5, 1, 2]
         self.rot_speed = random.choice(rotaciones)
 
-        self.speed_modifier = initial_speed
+        self.speed_modifier = speed_modif
 
         image = pygame.image.load(ASTEROID_IMAGE)
         scale = int(40 * (radius/ASTEROID_MIN_RADIUS))
         scaled_image = pygame.transform.smoothscale(image, (scale,scale))
         final_image = pygame.transform.rotate(scaled_image, random.randint(0,180))
-
         self.og_image = final_image
 
 
@@ -29,9 +28,12 @@ class Asteroid(circleshape.CircleShape):
         #pygame.draw.circle(screen, "white", self.position, self.radius, LINE_WIDTH)
     
 
-    def update(self, delta_time):
+    def update(self, delta_time, asteroid_field):
         self.position += self.velocity * delta_time * self.speed_modifier
         self.rotation += delta_time * self.rot_speed * 15
+
+        if not asteroid_field.contiene(self.position):
+            self.kill()
 
     def split(self):
         self.kill()

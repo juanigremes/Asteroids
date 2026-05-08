@@ -7,13 +7,13 @@ from logger import log_state
 from player import Player
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
-from shot import Shot
+from shot import Shot, EnemyShot
+from enemies import TieFighter
 import highscore
 
 
 
 # Main
-
 def main():
     print(f"Starting Asteroids with pygame version: {pygame.version.ver}")
 
@@ -26,8 +26,8 @@ def main():
 
 def start_menu(screen):
     #Menu de inicio
-    font = pygame.font.Font("Starjedi.ttf", 50)
-    background = pygame.image.load("fondo_menu.jpg").convert()
+    font = pygame.font.Font("fonts/Starjedi.ttf", 50)
+    background = pygame.image.load("imagenes/fondo_menu.jpg").convert()
     background = pygame.transform.scale(background, screen.get_size())
 
 
@@ -44,7 +44,9 @@ def start_menu(screen):
                     selected = (selected - 1) % len(options)
                 if evento.key == pygame.K_RETURN:
                     if selected == 0:
-                        name_menu(screen)
+                        background = pygame.image.load("imagenes/fondo_juego.jpg").convert()
+                        background = pygame.transform.scale(background, screen.get_size())
+                        name_menu(screen, font, background)
                     elif selected == 1:
                         pygame.quit()
                         sys.exit()
@@ -74,11 +76,7 @@ def start_menu(screen):
 
 
 
-def name_menu(screen):
-    font = pygame.font.Font("Starjedi.ttf", 50)
-    background = pygame.image.load("fondo_juego.jpg").convert()
-    background = pygame.transform.scale(background, screen.get_size())
-
+def name_menu(screen, font, background):
     
     nombre_jugador = ""
     while True: 
@@ -87,7 +85,7 @@ def name_menu(screen):
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_RETURN:
                     if nombre_jugador != "":
-                        game_loop(screen, nombre_jugador)
+                        game_loop(screen, font, background, nombre_jugador)
                 elif evento.key == pygame.K_BACKSPACE:
                     if nombre_jugador != "":
                         nombre_jugador = nombre_jugador[:-1]
@@ -109,31 +107,28 @@ def name_menu(screen):
 
 
 
-def game_loop(screen, nombre_jugador):
-    pygame.mixer.music.load("duel_of_the_fates.mp3")
+def game_loop(screen, font, background, nombre_jugador):
+    pygame.mixer.music.load("sonido/duel_of_the_fates.mp3")
     pygame.mixer.music.play(-1)
 
 
-    font = pygame.font.Font("Starjedi.ttf", 50)
-    background = pygame.image.load("fondo_juego.jpg").convert()
-    background = pygame.transform.scale(background, screen.get_size())
-
-    
-   
     clock = pygame.time.Clock()
     delta_time = 0
     
     #groups
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
-    asteroids = pygame.sprite.Group()
+    deadly = pygame.sprite.Group()
     shots = pygame.sprite.Group()
+    shooters = pygame.sprite.Group()
 
 
     Player.containers = (updatable, drawable)
-    Asteroid.containers = (asteroids, updatable, drawable)
+    TieFighter.containers = (shooters, deadly, updatable, drawable)
+    Asteroid.containers = (deadly, updatable, drawable)
     AsteroidField.containers = (updatable)
     Shot.containers = (shots, updatable, drawable)
+    EnemyShot.containers =(deadly, updatable, drawable)
 
     asteroid_field = AsteroidField()
     player = Player(screen.get_width()/2, screen.get_height()/2)
@@ -150,19 +145,22 @@ def game_loop(screen, nombre_jugador):
                 return
         screen.blit(background, (0,0))
 
-        updatable.update(delta_time)
+        for shooter in shooters:
+            shooter.shoot()
+ 
+        updatable.update(delta_time, asteroid_field)
 
-        for asteroid in asteroids:
-            if asteroid.collides_with(player):
+        for element in deadly:
+            if element.collides_with(player):
                 log_event("player_hit")
                 pygame.mixer.music.stop()
-                game_over_menu(screen, nombre_jugador, score)
+                game_over_menu(screen, font, background, nombre_jugador, score)
             for shot in shots:
-                if asteroid.collides_with(shot):
+                if element.collides_with(shot):
                     log_event("asteroid_shot")
-                    asteroids_score += asteroid.get_points_value()
+                    asteroids_score += element.get_points_value()
                     shot.kill()
-                    asteroid.split()
+                    element.split()
 
         for drawable_elem in drawable:
             drawable_elem.draw(screen)
@@ -170,8 +168,9 @@ def game_loop(screen, nombre_jugador):
 
         delta_time = clock.tick(60) / 1000
         tiempo_acumulado += delta_time
-        
-        if tiempo_acumulado >= 6:
+
+       
+        if tiempo_acumulado >= 5:
             time_score += 1
             asteroid_field.increment_spawn_rate()
             asteroid_field.increment_asteroid_speed()
@@ -184,10 +183,7 @@ def game_loop(screen, nombre_jugador):
         pygame.display.flip()
 
 
-def game_over_menu(screen, nombre_jugador, score):
-    font = pygame.font.Font("Starjedi.ttf", 50)
-    background = pygame.image.load("fondo_juego.jpg").convert()
-    background = pygame.transform.scale(background, screen.get_size())
+def game_over_menu(screen, font, background, nombre_jugador, score):
     
     if score > highscore.highscore[1]:
         with open("highscore.py", "w") as f:
@@ -206,7 +202,7 @@ def game_over_menu(screen, nombre_jugador, score):
                     selected = (selected - 1) % len(options)
                 if evento.key == pygame.K_RETURN:
                     if selected == 0:
-                        game_loop(screen, nombre_jugador)
+                        game_loop(screen, font, background, nombre_jugador)
                     elif selected == 1:
                         start_menu(screen)
                     else:

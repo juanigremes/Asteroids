@@ -1,1 +1,1 @@
-highscore = ["karen la mejor",39]
+highscore = ["junai",334]
