@@ -1,7 +1,7 @@
 import pygame
 import random
 from asteroid import Asteroid
-from enemies import TieFighter
+from enemies import TieFighter, VultureDroid
 from constants import *
 
 class AsteroidField(pygame.sprite.Sprite):
@@ -24,13 +24,14 @@ class AsteroidField(pygame.sprite.Sprite):
         ],
     ]
 
-    def __init__(self):
+   def __init__(self, player):
         pygame.sprite.Sprite.__init__(self, self.containers)
         self.spawn_timer = 0.0
         self.spawn_rate = ASTEROID_SPAWN_RATE_SECONDS
         self.speed_modifier = random.uniform(1,2.5)
         self.min_speed = 50
         self.max_speed = 100
+        self.player = player
 
     def spawn_asteroid(self, radius, position, velocity):
         asteroid = Asteroid(position.x, position.y, radius, self.speed_modifier)
@@ -38,6 +39,9 @@ class AsteroidField(pygame.sprite.Sprite):
 
     def spawn_tie_fighter(self, position, velocity):
         tie_fighter = TieFighter(position.x, position.y, PLAYER_RADIUS, self.speed_modifier, velocity)
+
+    def spawn_vulture_droid(self, position, velocity):
+        vulture_droid = VultureDroid(position.x, position.y, PLAYER_RADIUS, velocity, player)
 
     def update(self, dt, af):
         self.spawn_timer += dt
@@ -50,9 +54,11 @@ class AsteroidField(pygame.sprite.Sprite):
             velocity = edge[0] * speed
             velocity = velocity.rotate(random.randint(-30, 30))
             position = edge[1](random.uniform(0, 1))
-            kind = random.randint(0, ASTEROID_KINDS)
+            kind = 1#random.randint(0, ASTEROID_KINDS)
             if kind == 0:
                 self.spawn_tie_fighter(position, velocity)
+            if kind == 1:
+                self.spawn_vulture_droid(position, velocity)
             else:
                 self.spawn_asteroid(ASTEROID_MIN_RADIUS * kind, position, velocity)
 

@@ -8,7 +8,7 @@ from player import Player
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from shot import Shot, EnemyShot
-from enemies import TieFighter
+from enemies import TieFighter, VultureDroid
 import highscore
 
 
@@ -121,17 +121,18 @@ def game_loop(screen, font, background, nombre_jugador):
     deadly = pygame.sprite.Group()
     shots = pygame.sprite.Group()
     shooters = pygame.sprite.Group()
-
+    vulture_droids = pygame.sprite.Group()
 
     Player.containers = (updatable, drawable)
     TieFighter.containers = (shooters, deadly, updatable, drawable)
+    VultureDroid.containers = (vulture_droids, deadly, updatable, drawable)
     Asteroid.containers = (deadly, updatable, drawable)
     AsteroidField.containers = (updatable)
     Shot.containers = (shots, updatable, drawable)
     EnemyShot.containers =(deadly, updatable, drawable)
 
-    asteroid_field = AsteroidField()
     player = Player(screen.get_width()/2, screen.get_height()/2)
+    asteroid_field = AsteroidField(player)
 
     asteroids_score = 0
     time_score = 0
@@ -155,6 +156,11 @@ def game_loop(screen, font, background, nombre_jugador):
                 log_event("player_hit")
                 pygame.mixer.music.stop()
                 game_over_menu(screen, font, background, nombre_jugador, score)
+            for vulture in vulture_droids:
+                if vulture != element:
+                    if element.collides_with(vulture):
+                        element.split()
+                        vulture.split()
             for shot in shots:
                 if element.collides_with(shot):
                     log_event("asteroid_shot")
