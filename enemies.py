@@ -83,16 +83,12 @@ class VultureDroid(circleshape.CircleShape):
     
     def __init__(self, x, y, radius, velocity, player):
         super().__init__(x, y, radius)
+        
         self.rotation = velocity.angle_to((0,1))
-        
-        self.player = player
-
-        self.turn_cooldown = calculate_turn_cooldown(self, player)
-        
         self.velocity = velocity 
 
         image = pygame.image.load(VULTURE_IMAGE)
-        scale = 65
+        scale = 60
         scaled_image = pygame.transform.smoothscale(image, (scale,scale))
         final_image = pygame.transform.rotate(scaled_image, self.rotation)
         self.og_image = final_image
@@ -101,40 +97,18 @@ class VultureDroid(circleshape.CircleShape):
         screen.blit(self.og_image, self.og_image.get_rect(center=self.position))
         pygame.draw.circle(screen, "white", self.position, self.radius, LINE_WIDTH)
 
+    def update(self, delta_time, asteroid_field):
+        self.position += self.velocity * delta_time 
+
+        #esto lo tengo que eliminar
+        if not asteroid_field.contiene(self.position):
+            self.kill()
+        
     def split(self):
         self.kill()
         log_event("asteroid_split")
 
     def get_points_value(self):
         return 15
-#-------------------------------------------------------------------------
-#esto es de player
-
-    def rotate(self, delta_time):
-        self.rotation += PLAYER_TURN_SPEED * delta_time
-        
-    def move(self, delta_time):
-        unit_vector = pygame.Vector2(0,1)
-        rotated_vector = unit_vector.rotate(self.rotation)
-        rotated_vector_with_speed = rotated_vector * VULTURE_SPEED * delta_time
-        self.position += rotated_vector_with_speed
-    
-    def update(self, delta_time, asteroid_field):
-        self.rotate(delta_time)
-        self.turn_cooldown = calculate_turn_cooldown(self, self.player)
-        
-        if keys[pygame.K_LEFT]:
-            self.rotate(-1 * delta_time)
-        if keys[pygame.K_RIGHT]:
-            self.rotate(delta_time)
-        
-        self.move(delta_time)
-
-        if keys[pygame.K_DOWN]:
-            self.move(-1 * delta_time)
-            diff1 = self.position + pygame.Vector2(ASTEROID_MAX_RADIUS,ASTEROID_MAX_RADIUS)
-            diff2 = self.position - pygame.Vector2(ASTEROID_MAX_RADIUS,ASTEROID_MAX_RADIUS)
-            if not asteroid_field.contiene(diff1) or not asteroid_field.contiene(diff2):
-                self.move(+1 * delta_time)
 
 

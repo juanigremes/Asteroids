@@ -24,7 +24,7 @@ class AsteroidField(pygame.sprite.Sprite):
         ],
     ]
 
-   def __init__(self, player):
+    def __init__(self, player):
         pygame.sprite.Sprite.__init__(self, self.containers)
         self.spawn_timer = 0.0
         self.spawn_rate = ASTEROID_SPAWN_RATE_SECONDS
@@ -41,7 +41,7 @@ class AsteroidField(pygame.sprite.Sprite):
         tie_fighter = TieFighter(position.x, position.y, PLAYER_RADIUS, self.speed_modifier, velocity)
 
     def spawn_vulture_droid(self, position, velocity):
-        vulture_droid = VultureDroid(position.x, position.y, PLAYER_RADIUS, velocity, player)
+        vulture_droid = VultureDroid(position.x, position.y, PLAYER_RADIUS, velocity, self.player)
 
     def update(self, dt, af):
         self.spawn_timer += dt
